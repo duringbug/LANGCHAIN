@@ -1,0 +1,14 @@
+services:
+  tidb:
+    image: pingcap/tidb:latest
+    container_name: tidb
+    ports:
+      - "4000:4000"  # TiDB 默认端口
+    environment:
+      - TZ=Asia/Shanghai
+    networks:
+      - tidb_network
+
+networks:
+  tidb_network:
+    driver: bridge

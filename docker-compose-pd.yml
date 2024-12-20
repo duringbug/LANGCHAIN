@@ -1,0 +1,14 @@
+services:
+  pd:
+    image: pingcap/pd:latest
+    container_name: pd
+    ports:
+      - "2379:2379"  # PD 默认端口
+    environment:
+      - TZ=Asia/Shanghai
+    networks:
+      - tidb_network
+
+networks:
+  tidb_network:
+    driver: bridge
