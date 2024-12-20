@@ -18,18 +18,29 @@ export const connectToTiDB = (): Promise<void> => {
         reject(err);  // 如果连接失败，则返回错误
       } else {
         console.log('已连接到 TiDB，连接 ID: ' + connection.threadId);
-        // 执行查询
-        connection.query('SELECT 1 + 1 AS solution', (err, results) => {
+        
+        // 查询 TiKV 节点的状态
+        const query = 'SELECT COUNT(*) AS tikv_node_count FROM information_schema.tikv_store_status WHERE store_state = 0;';
+
+        connection.query(query, (err, results) => {
           if (err) {
             console.error('查询失败: ' + err.stack);
             reject(err);  // 如果查询失败，则返回错误
           } else {
-            console.log('查询结果: ', results);
+            // 这里假设返回的结果是 RowDataPacket 数组
+            if (results && Array.isArray(results) && results.length > 0) {
+              const tikvNodeCount = (results[0] as mysql.RowDataPacket).tikv_node_count;
+              console.log('TiKV 节点数量: ', tikvNodeCount);
+            } else {
+              console.log('没有找到 TiKV 节点。');
+            }
             resolve();  // 查询成功，返回成功
           }
           connection.end();  // 确保关闭连接
         });
+        
       }
     });
+
   });
 };
