@@ -1,0 +1,50 @@
+services:
+  pd:
+    image: pingcap/pd:latest
+    container_name: pd
+    ports:
+      - "4112:4112"
+    networks:
+      - tikv_tidb_net
+    command:
+      - --name=pd
+      - --data-dir=/pd/data
+      - --client-urls=http://0.0.0.0:4112
+      - --peer-urls=http://0.0.0.0:2380
+      - --initial-cluster=pd=http://pd:2380
+      - --initial-cluster-state=new
+    volumes:
+      - ./data/pd:/pd/data
+
+  tikv:
+    image: pingcap/tikv:latest
+    container_name: tikv
+    ports:
+      - "20160:20160"
+    networks:
+      - tikv_tidb_net
+    command:
+      - --addr=0.0.0.0:20160
+      - --advertise-addr=tikv:20160
+      - --data-dir=/tikv/data
+      - --pd=pd:4112
+    volumes:
+      - ./data/tikv:/tikv/data
+
+  tidb:
+    image: pingcap/tidb:latest
+    container_name: tidb
+    ports:
+      - "4000:4000"
+    networks:
+      - tikv_tidb_net
+    command:
+      - --store=tikv
+      - --path=pd:4112
+    depends_on:
+      - pd
+      - tikv
+
+networks:
+  tikv_tidb_net:
+    driver: bridge
