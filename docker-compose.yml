@@ -1,6 +1,6 @@
 services:
   pd01:
-    image: pingcap/pd:v6.6.0
+    image: pingcap/pd:latest
     container_name: pd01
     ports:
       - "2379:2379"
@@ -17,7 +17,7 @@ services:
   
 
   tidb:
-    image: pingcap/tidb:v6.6.0
+    image: pingcap/tidb:latest
     container_name: tidb
     ports:
       - "4000:4000"
@@ -34,7 +34,7 @@ services:
         ipv4_address: 172.21.0.6
 
   tikv01:
-    image: pingcap/tikv:v6.6.0
+    image: pingcap/tikv:latest
     container_name: tikv01
     ports:
       - "20160:20160"
@@ -52,7 +52,7 @@ services:
         ipv4_address: 172.21.0.3
 
   tikv02:
-    image: pingcap/tikv:v6.6.0
+    image: pingcap/tikv:latest
     container_name: tikv02
     ports:
       - "20161:20161"
@@ -71,7 +71,7 @@ services:
         ipv4_address: 172.21.0.4
 
   tikv03:
-    image: pingcap/tikv:v6.6.0
+    image: pingcap/tikv:latest
     container_name: tikv03
     ports:
       - "20162:20162"
