@@ -1,26 +1,32 @@
-import * as mysql from 'mysql2';
-import * as dotenv from 'dotenv';
-import type { Connection } from 'mysql2';
+const mysql = require('mysql2');
+const dotenv = require('dotenv');
+const cliProgress = require('cli-progress');
+const bar = new cliProgress.SingleBar({
+  format: '插入进度 | {bar} | {percentage}% | 剩余时间: {eta}s',
+  barCompleteChar: '\u2588',
+  barIncompleteChar: '\u2591',
+}, cliProgress.Presets.shades_classic);
+
 dotenv.config();
 
-const getTidbConnection = (database: string):Promise<Connection> =>{
+const getTidbConnection = (database) => {
   return new Promise((resolve, reject) => {
     // 创建一个连接池
     const connection = mysql.createConnection({
-      host: process.env.TIDB_HOST,  // TiDB 的主机地址import.meta.env.VITE_COHERE_API_KEY
+      host: process.env.TIDB_HOST,  // TiDB 的主机地址
       port: Number(process.env.TIDB_PORT),         // TiDB 的端口号
       user: process.env.TIDB_USERNAME,       // MySQL 用户名
       password: process.env.TIDB_PASSWORD,  // 你设置的 root 用户密码
       database: database,   // 默认数据库（可以根据需要修改）
     });
     resolve(connection);
-  })
-}
+  });
+};
 
-export const connectToTiDB = (): Promise<void> => {
+const connectToTiDB = () => {
   return new Promise(async (resolve, reject) => {
     // 创建一个连接池
-    const connection = await getTidbConnection('test')
+    const connection = await getTidbConnection('test');
 
     // 测试连接
     connection.connect((err) => {
@@ -40,7 +46,7 @@ export const connectToTiDB = (): Promise<void> => {
           } else {
             // 这里假设返回的结果是 RowDataPacket 数组
             if (results && Array.isArray(results) && results.length > 0) {
-              const tikvNodeCount = (results[0] as mysql.RowDataPacket).tikv_node_count;
+              const tikvNodeCount = results[0].tikv_node_count;
               console.log('TiKV 节点数量: ', tikvNodeCount);
             } else {
               console.log('没有找到 TiKV 节点。');
@@ -49,33 +55,19 @@ export const connectToTiDB = (): Promise<void> => {
           }
           connection.end();  // 确保关闭连接
         });
-        
       }
     });
-
   });
 };
 
-export interface VectorInfo {
-  text: string;
-  herf: string;
-  time: string;
-  vector: number[];
-}
-// 定义并导出一个类
-export class VectorIntoMysql {
-  // 类的属性
-  private vectorArray: VectorInfo[];
-  private connection: Connection | null = null;
-
-  // 构造函数
-  private constructor(vectorArray: VectorInfo[]) {
+class VectorIntoMysql {
+  constructor(vectorArray) {
     this.vectorArray = vectorArray;
+    this.connection = null;
     console.log('VectorIntoMysql 实例已创建');
   }
 
-  // 静态工厂方法来创建实例并初始化数据库连接
-  static async create(vectorArray: VectorInfo[]): Promise<VectorIntoMysql> {
+  static async create(vectorArray) {
     console.log("create VectorIntoMysql 开始");
     const instance = new VectorIntoMysql(vectorArray);
     instance.connection = await getTidbConnection('cloud');  // 异步初始化数据库连接
@@ -83,8 +75,7 @@ export class VectorIntoMysql {
     return instance;
   }
 
-  // 将回调转换为 Promise
-  private async beginTransaction(): Promise<void> {
+  async beginTransaction() {
     console.log('开始事务...');
     return new Promise((resolve, reject) => {
       if (!this.connection) return reject(new Error('没有数据库连接'));
@@ -100,7 +91,7 @@ export class VectorIntoMysql {
     });
   }
 
-  private async commit(): Promise<void> {
+  async commit() {
     console.log('提交事务...');
     return new Promise((resolve, reject) => {
       if (!this.connection) return reject(new Error('没有数据库连接'));
@@ -116,7 +107,7 @@ export class VectorIntoMysql {
     });
   }
 
-  private async rollback(): Promise<void> {
+  async rollback() {
     console.log('回滚事务...');
     return new Promise((resolve, reject) => {
       if (!this.connection) return reject(new Error('没有数据库连接'));
@@ -132,12 +123,11 @@ export class VectorIntoMysql {
     });
   }
 
-  // 使用事务初始化 info 表并插入 VectorInfo 数组中的数据
-  async initializeInfoTable(): Promise<void> {
+  async initializeInfoTable() {
     if (!this.connection) {
       throw new Error('数据库连接未初始化');
     }
-  
+
     const connection = this.connection;
     console.log('准备创建 info 表和插入数据');
     
@@ -177,22 +167,24 @@ export class VectorIntoMysql {
       });
   
       // 插入数据，确保所有插入操作都完成后才提交
-      for (const vector of this.vectorArray) {
-        const { time, text, herf, vector: vectorData } = vector;
+      // 初始化进度条
+      bar.start(this.vectorArray.length, 0);
+      for (const [index, vector] of this.vectorArray.entries()) {
+        const { time, text, herf, vectorData } = vector;
         
-        await new Promise<void>((resolve, reject) => {
+        await new Promise((resolve, reject) => {
           connection.query(insertQuery, [time, text, herf, JSON.stringify(vectorData)], (err, result) => {
             if (err) {
               console.error('插入数据失败:', err);
               reject(err);
             } else {
-              console.log('数据插入成功:', result);
+              bar.update(index + 1);
               resolve();
             }
           });
         });
       }
-  
+      bar.stop();
       // 提交事务
       await this.commit();
       console.log('所有数据已成功插入并提交到 info 表');
@@ -202,9 +194,8 @@ export class VectorIntoMysql {
       console.error('事务失败，已回滚:', error);
     }
   }
-  
-  // 添加一个用于关闭连接的方法
-  async close(): Promise<void> {
+
+  async close() {
     if (this.connection) {
       this.connection.end((err) => {
         if (err) {
@@ -216,8 +207,7 @@ export class VectorIntoMysql {
     }
   }
 
-   // 添加获取 vector 的方法
-  async getVector(): Promise<number[] | null> {
+  async getVector() {
     if (!this.connection) {
       throw new Error('数据库连接未初始化');
     }
@@ -228,7 +218,7 @@ export class VectorIntoMysql {
     `;
 
     try {
-      const result = await new Promise<any>((resolve, reject) => {
+      const result = await new Promise((resolve, reject) => {
         connection.query(query, (err, result) => {
           if (err) {
             console.error('查询失败:', err);
@@ -252,3 +242,5 @@ export class VectorIntoMysql {
     }
   }
 }
+
+module.exports = { connectToTiDB, VectorIntoMysql };
