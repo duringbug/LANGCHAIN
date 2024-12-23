@@ -1,10 +1,10 @@
 <template>
 <div class="flex h-screen">
     <!-- Left Sidebar -->
-    <div :class="sidebarClass" class="content-blue h-full transition-all duration-300 bg-gradient-to-r from-blue-500 to-indigo-600 p-4 rounded-r-3xl shadow-lg" @mouseover="showCancelIcon" @mouseleave="hideCancelIcon">
+    <div :class="sidebarClass" class="content-blue h-full transition-all duration-300 bg-gradient-to-r from-blue-500 to-indigo-600 p-4 shadow-lg" @mouseover="showCancelIcon" @mouseleave="hideCancelIcon">
         <div class="flex items-center justify-between">
-            <h2 v-if="!isSidebarCollapsed" class="text-xl font-semibold text-white ml-8">HOME</h2>
-            <button @click="toggleSidebar" class="p-2 text-white hover:text-gray-300 focus:outline-none">
+            <h2 v-if="!isSidebarCollapsed" class="text-xl font-semibold text-white">历史记录</h2>
+            <button @click="toggleSidebar" class="text-white hover:text-gray-300 focus:outline-none">
                 <span v-if="isSidebarCollapsed">
                     <CollapsibleSidebarIcon :size="'32'" />
                 </span>
@@ -25,7 +25,7 @@
     </div>
 
     <!-- Main Content -->
-    <div class="content-sky flex-1 p-6 bg-gradient-to-t from-indigo-100 to-white rounded-l-3xl">
+    <div class="content-sky flex-1 p-6 bg-gradient-to-t from-indigo-100 to-white">
         <div class="flex flex-col items-center justify-center space-y-6">
             <h2 class="text-3xl font-bold text-gray-800">AI Chat</h2>
             <div v-for="(chat, index) in chatItems" :key="index" class="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl mb-6">
