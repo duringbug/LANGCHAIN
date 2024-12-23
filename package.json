@@ -8,6 +8,7 @@
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
+    "build-backend": "babel src/backend --out-dir backend --minified && find backend -type f -name \"*.js\" -exec bash -c 'mv \"$0\" \"${0%.js}.cjs\"' {} \\;",
     "type-check": "vue-tsc --build",
     "test": "jest",
     "backend": "nodemon src/backend/server.cjs",
@@ -21,6 +22,9 @@
     "vue-router": "^4.4.5"
   },
   "devDependencies": {
+    "@babel/cli": "^7.26.4",
+    "@babel/plugin-transform-modules-commonjs": "^7.26.3",
+    "@babel/preset-env": "^7.26.0",
     "@langchain/cohere": "^0.3.1",
     "@langchain/core": "^0.3.26",
     "@langchain/openai": "^0.3.16",
@@ -32,6 +36,7 @@
     "@vue/tsconfig": "^0.7.0",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.9",
+    "babel-preset-minify": "^0.5.2",
     "chromedriver": "^131.0.4",
     "cli-progress": "^3.12.0",
     "cohere-ai": "^7.15.0",
@@ -55,6 +60,8 @@
     "vfonts": "^0.0.3",
     "vite": "^6.0.1",
     "vite-plugin-vue-devtools": "^7.6.5",
-    "vue-tsc": "^2.1.10"
+    "vue-tsc": "^2.1.10",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1"
   }
 }
