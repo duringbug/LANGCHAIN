@@ -3,13 +3,13 @@ services:
     image: pingcap/pd:latest
     container_name: pd01
     ports:
-      - "2379:2379"
-      - "2380:2380"
+      - "2489:2379"
+      - "2481:2380"
     environment:
       - TZ=Asia/Shanghai
     networks:
       custom_network:
-        ipv4_address: 172.21.0.2
+        ipv4_address: 172.22.0.2
     command:
       - --client-urls=http://0.0.0.0:2379  # 让 pd 监听所有接口
       - --peer-urls=http://0.0.0.0:2380    # 设置与其他 PD 节点的通信地址
@@ -31,7 +31,7 @@ services:
       - tikv03
     networks:
       custom_network:
-        ipv4_address: 172.21.0.6
+        ipv4_address: 172.22.0.6
 
   tikv01:
     image: pingcap/tikv:latest
@@ -41,7 +41,7 @@ services:
       - "20180:20180"
     command:
       - --pd=http://pd01:2379
-      - --addr=172.21.0.3:20160 
+      - --addr=172.22.0.3:20160 
       - --status-addr=tikv01:20180 
     environment:
       - TZ=Asia/Shanghai
@@ -49,7 +49,7 @@ services:
       - pd01
     networks:
       custom_network:
-        ipv4_address: 172.21.0.3
+        ipv4_address: 172.22.0.3
 
   tikv02:
     image: pingcap/tikv:latest
@@ -59,7 +59,7 @@ services:
       - "20181:20181"
     command:
       - --pd=http://pd01:2379
-      - --addr=172.21.0.4:20161 
+      - --addr=172.22.0.4:20161 
       - --status-addr=tikv02:20181 
     environment:
       - TZ=Asia/Shanghai
@@ -68,7 +68,7 @@ services:
       - tikv01
     networks:
       custom_network:
-        ipv4_address: 172.21.0.4
+        ipv4_address: 172.22.0.4
 
   tikv03:
     image: pingcap/tikv:latest
@@ -78,7 +78,7 @@ services:
       - "20182:20182"
     command:
       - --pd=http://pd01:2379
-      - --addr=172.21.0.5:20162 
+      - --addr=172.22.0.5:20162 
       - --status-addr=tikv03:20182 
     environment:
       - TZ=Asia/Shanghai
@@ -87,11 +87,11 @@ services:
       - tikv02
     networks:
       custom_network:
-        ipv4_address: 172.21.0.5
+        ipv4_address: 172.22.0.5
 
 networks:
   custom_network:
     driver: bridge
     ipam:
       config:
-        - subnet: "172.21.0.0/16"
+        - subnet: "172.22.0.0/16"

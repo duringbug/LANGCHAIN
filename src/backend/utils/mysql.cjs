@@ -9,7 +9,7 @@ const bar = new cliProgress.SingleBar({
 
 dotenv.config();
 
-const getTidbConnection = (database) => {
+const getTidbConnection = () => {
   return new Promise((resolve, reject) => {
     // 创建一个连接池
     const connection = mysql.createConnection({
@@ -17,7 +17,7 @@ const getTidbConnection = (database) => {
       port: Number(process.env.TIDB_PORT),         // TiDB 的端口号
       user: process.env.TIDB_USERNAME,       // MySQL 用户名
       password: process.env.TIDB_PASSWORD,  // 你设置的 root 用户密码
-      database: database,   // 默认数据库（可以根据需要修改）
+      database: process.env.TIDB_DATABASE,   // 默认数据库（可以根据需要修改）
     });
     resolve(connection);
   });
@@ -26,7 +26,7 @@ const getTidbConnection = (database) => {
 const connectToTiDB = () => {
   return new Promise(async (resolve, reject) => {
     // 创建一个连接池
-    const connection = await getTidbConnection('test');
+    const connection = await getTidbConnection();
 
     // 测试连接
     connection.connect((err) => {
@@ -70,7 +70,7 @@ class VectorIntoMysql {
   static async create(vectorArray) {
     console.log("create VectorIntoMysql 开始");
     const instance = new VectorIntoMysql(vectorArray);
-    instance.connection = await getTidbConnection('cloud');  // 异步初始化数据库连接
+    instance.connection = await getTidbConnection('test');  // 异步初始化数据库连接
     console.log('数据库连接已建立');
     return instance;
   }

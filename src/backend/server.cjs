@@ -25,7 +25,7 @@ const connection = mysql.createPool({
   port: process.env.TIDB_PORT,         // 从 .env 中读取数据库端口
   user: process.env.TIDB_USERNAME,     // 从 .env 中读取数据库用户名
   password: process.env.TIDB_PASSWORD, // 从 .env 中读取数据库密码
-  database: 'cloud',      // 使用你的数据库名称
+  database: process.env.TIDB_DATABASE,      // 使用你的数据库名称
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
