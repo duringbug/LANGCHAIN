@@ -54,6 +54,20 @@ const canSendMessage = computed(() => {
   return messages.value[messages.value.length - 1]?.isSender === false;
 });
 
+let backendHost = import.meta.env.VITE_BACKEND_HOST
+let backendPort = import.meta.env.VITE_BACKEND_PORT
+
+// 尝试从 /config 接口获取动态配置
+try {
+    const config = await axios.get('/config');
+    if (config.status === 200) {
+        backendHost = config.data.backendHost;
+        backendPort = config.data.backendPort;
+    }
+} catch (error) {
+    console.error('Failed to fetch configuration:', error);
+}
+
 // 发送消息
 const sendMessage = async () => {
     messages.value.push({
@@ -62,7 +76,7 @@ const sendMessage = async () => {
         });
     if (newMessage.value.trim()) {
         try {
-            const response = await axios.post('http://localhost:3000/api/ask', {
+            const response = await axios.post(`http://${backendHost}:${backendPort}/api/ask`, {
                 question: newMessage.value // 发送 toolInput.value 作为 question 到后端
             });
             messages.value.push({
@@ -70,10 +84,21 @@ const sendMessage = async () => {
                 isSender: false,
             });
         } catch (error) {
-            messages.value.push({
-                text: '请求失败，请稍后再试',
-                isSender: false,
-            });
+            // 类型保护，检查 error 是否为 AxiosError
+            if (axios.isAxiosError(error)) {
+                // 提取 Axios 错误信息
+                const errorMessage = error.response?.data?.message || error.message || '请求失败，请稍后再试';
+                messages.value.push({
+                    text: `请求失败: ${errorMessage}`,
+                    isSender: false,
+                });
+            } else {
+                // 处理非 Axios 错误的情况
+                messages.value.push({
+                    text: '请求失败，请稍后再试',
+                    isSender: false,
+                });
+            }
         }
     }
 };

@@ -14,7 +14,11 @@ const { AgentAction, AgentStep, AgentFinish } = require('@langchain/core/agents'
 const app = express();
 
 // 允许跨域请求
-app.use(cors());
+app.use(cors({
+  origin: '*',  // 允许任何来源的请求
+  methods: ['GET', 'POST', 'OPTIONS'],
+  preflightContinue: false,
+}));
 
 // 使用 JSON 中间件
 app.use(express.json());
@@ -96,6 +100,10 @@ const initializeEmbeddings = async () => {
 initializeEmbeddings();
 
 // 后端路由：处理 /api/ask 请求
+app.options('/api/ask', (req, res) => {
+  console.log('Received OPTIONS request for /api/ask');
+  res.sendStatus(200);  // 返回 200 状态码
+});
 app.post('/api/ask', async (req, res) => {
   const { question } = req.body; // 获取客户端请求中的问题
   if (!question) {

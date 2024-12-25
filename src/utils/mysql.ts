@@ -7,7 +7,7 @@ const getTidbConnection = (database: string):Promise<Connection> =>{
   return new Promise((resolve, reject) => {
     // 创建一个连接池
     const connection = mysql.createConnection({
-      host: process.env.TIDB_HOST,  // TiDB 的主机地址import.meta.env.VITE_COHERE_API_KEY
+      host: process.env.TIDB_HOST,  // TiDB 的主机地址
       port: Number(process.env.TIDB_PORT),         // TiDB 的端口号
       user: process.env.TIDB_USERNAME,       // MySQL 用户名
       password: process.env.TIDB_PASSWORD,  // 你设置的 root 用户密码
