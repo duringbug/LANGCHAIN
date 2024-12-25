@@ -68,6 +68,7 @@ const fetchVectorsAndCreateEmbeddings = async () => {
     vector: item.vector,
   }));
 
+  console.log(process.env.VITE_COHERE_API_KEY)
   const embeddings = new CacheEmbeddings(process.env.VITE_COHERE_API_KEY, documents);
   const vectorStore = new MemoryVectorStore();
   await vectorStore.addDocuments(documents, embeddings);

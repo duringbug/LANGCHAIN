@@ -12,29 +12,32 @@ services:
       - backend  # 确保 Nginx 服务在 backend 服务之后启动
     networks:
       custom_network:
-        ipv4_address: 172.22.0.8
+        ipv4_address: 192.168.0.8
 
   backend:
     image: duringbug/rag-backend:latest  # 使用你刚构建的后端镜像
     container_name: backend01  # 后端容器名称
     ports:
       - "3333:3000"  # 映射后端服务端口
+    dns:
+      - 8.8.8.8  # Google DNS
+      - 8.8.4.4
     environment:
       VITE_COHERE_API_KEY: "RImEdnMnrGLhTOvd16gINcbFut8NUOZR4toTzKH8"
-      TIDB_HOST: "172.22.0.6"
+      TIDB_HOST: "tidb"
       TIDB_PORT: "4000"
       TIDB_USERNAME: "root"
-      TIDB_PASSWORD: ""  # 空密码
-      TIDB_DATABASE: "test"
-      BACKEND_HOST: "172.22.0.7"
+      TIDB_PASSWORD: "tjf04712"
+      TIDB_DATABASE: "cloud"
+      BACKEND_HOST: "backend01"
       BACKEND_PORT: "3000"
     networks:
       custom_network:
-        ipv4_address: 172.22.0.7
+        ipv4_address: 192.168.0.7
 
 networks:
   custom_network:
     driver: bridge
     ipam:
       config:
-        - subnet: "172.22.0.0/16"
+        - subnet: "192.168.0.0/16"
