@@ -4,12 +4,11 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const { MemoryVectorStore, CohereEmbeddings, CacheEmbeddings } = require('./utils/vector.cjs');
+const { getVectorByCloud } = require('./utils/mysql.cjs')
 const dotenv = require('dotenv');
 dotenv.config();
 const { ChatCohere } = require('@langchain/cohere');
-const axios = require('axios');
 const { HumanMessage } = require('@langchain/core/messages');
-const { AgentAction, AgentStep, AgentFinish } = require('@langchain/core/agents');
 
 const app = express();
 
@@ -58,7 +57,13 @@ const getVector = async () => {
 
 // 提取出获取向量数据并创建嵌入模型实例的逻辑
 const fetchVectorsAndCreateEmbeddings = async () => {
-  const vectors = await getVector(); // 获取数据
+  let vectors;
+  if (process.env.USE_TIDB_CLOUD){
+    const result = await getVectorByCloud(); // 获取数据
+    vectors = result.data.rows
+  }else{
+    vectors = await getVector();
+  }
   if (!vectors) {
     throw new Error('No vectors found');
   }
@@ -167,7 +172,6 @@ app.post('/api/ask', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' }); // 如果发生错误，返回 500 错误
   }
 });
-
 // 启动服务器
 app.listen(process.env.BACKEND_PORT, () => {
   console.log(`Backend server is running at http://${process.env.BACKEND_HOST}:${process.env.BACKEND_PORT}`);

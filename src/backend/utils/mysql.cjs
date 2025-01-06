@@ -1,6 +1,7 @@
 const mysql = require('mysql2');
 const dotenv = require('dotenv');
 const cliProgress = require('cli-progress');
+const { request } = require('urllib');
 const bar = new cliProgress.SingleBar({
   format: '插入进度 | {bar} | {percentage}% | 剩余时间: {eta}s',
   barCompleteChar: '\u2588',
@@ -242,5 +243,19 @@ class VectorIntoMysql {
     }
   }
 }
+const getVectorByCloud = () =>{
+  const url = `${process.env.CLOUD_URL}/get_info`
+  const endpoint = async () => {
+    const { err, data, res } = await request( url,    
+      { 
+          digestAuth: `${process.env.PUBLIC_KEY}:${process.env.PRIVATE_KEY}`,
+          method: 'GET',
+        }
+      )
+    const result = JSON.parse(data.toString());
+    return result
+  }
+  return endpoint()
+}
 
-module.exports = { connectToTiDB, VectorIntoMysql };
+module.exports = { connectToTiDB, VectorIntoMysql, getVectorByCloud};
