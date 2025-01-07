@@ -3,7 +3,7 @@
     <!-- 当前聊天内容区域 -->
     <div class="flex-1 space-y-4 relative">
       <!-- 消息列表 -->
-      <div v-if="currentChat">
+      <div v-if="currentChat" class="mb-[100px]">
         <div v-for="(message, index) in currentChat.messages" :key="index" class="flex pt-4 px-10">
           <div v-if="message.isSender" class="ml-auto max-w-xs bg-sky-500 text-white p-3 rounded-[12px] shadow-md relative break-words">
             <p v-html="parseMarkdown(message.text)" class="overflow-x-auto"></p>
