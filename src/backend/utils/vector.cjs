@@ -53,23 +53,45 @@ class CohereEmbeddings extends Embeddings {
     this.cohereClient = new CohereClient({ token: apiKey });
   }
 
-  async embedDocuments(documents) {
-    const response = await this.cohereClient.embed({ texts: documents });
+  async embedDocuments(documents, retryCount = 3) {
+    try {
+      const response = await this.cohereClient.embed({ texts: documents });
 
-    if (Array.isArray(response.embeddings) && Array.isArray(response.embeddings[0])) {
-      return response.embeddings;
-    } else {
-      throw new Error('Unexpected embeddings format');
+      if (Array.isArray(response.embeddings) && Array.isArray(response.embeddings[0])) {
+        return response.embeddings;
+      } else {
+        throw new Error(`Unexpected embeddings format. Response: ${JSON.stringify(response)}`);
+      }
+    } catch (error) {
+      if (retryCount > 0) {
+        console.log(`Error embedding documents. Retrying in 80 seconds... (${retryCount} retries left)`);
+        // 等待 80 秒后重试
+        await new Promise(resolve => setTimeout(resolve, 80000));  // 80秒
+        return this.embedDocuments(documents, retryCount - 1);
+      } else {
+        throw new Error(`Error embedding documents. Documents: ${JSON.stringify(documents)}, Error: ${error.message}`);
+      }
     }
   }
 
-  async embedQuery(query) {
-    const response = await this.cohereClient.embed({ texts: [query] });
+  async embedQuery(query, retryCount = 3) {
+    try {
+      const response = await this.cohereClient.embed({ texts: [query] });
 
-    if (Array.isArray(response.embeddings) && Array.isArray(response.embeddings[0])) {
-      return response.embeddings[0];
-    } else {
-      throw new Error('Unexpected embeddings format');
+      if (Array.isArray(response.embeddings) && Array.isArray(response.embeddings[0])) {
+        return response.embeddings[0];
+      } else {
+        throw new Error(`Unexpected embeddings format. Response: ${JSON.stringify(response)}`);
+      }
+    } catch (error) {
+      if (retryCount > 0) {
+        console.log(`Error embedding query. Retrying in 80 seconds... (${retryCount} retries left)`);
+        // 等待 80 秒后重试
+        await new Promise(resolve => setTimeout(resolve, 80000));  // 80秒
+        return this.embedQuery(query, retryCount - 1);
+      } else {
+        throw new Error(`Error embedding query. Query: "${query}", Error: ${error.message}`);
+      }
     }
   }
 }
