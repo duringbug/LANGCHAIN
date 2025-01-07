@@ -1,3 +1,7 @@
+docker-compose-fe copy.yml
+docker-compose copy.yml
+
+
 # Logs
 logs
 *.log

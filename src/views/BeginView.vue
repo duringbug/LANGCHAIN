@@ -8,10 +8,23 @@
         <!-- Button with animation and shadow -->
         <button
             class="px-6 py-3 bg-indigo-600 text-white font-semibold text-lg rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl focus:outline-none">
-            <RouterLink to="/chat" class="hover:text-gray-400 transition-colors text-lg">点击开始</RouterLink>
+            <div @click="createNewChat" class="hover:text-gray-400 transition-colors text-lg">点击开始</div>
         </button>
     </div>
 </template>
 <script setup lang="ts">
+import { useRouter } from 'vue-router';
+//@ts-ignore
+import { useStore } from 'vuex';
+const store = useStore();
+const router = useRouter();
+// 创建新聊天
+const createNewChat = () => {
+    store.dispatch('createNewChat');
+    const latestChat = store.state.chats[store.state.chats.length - 1];
+    store.commit('setCurrentChatId', latestChat.id);  // 设置当前聊天ID
+    // 跳转到新聊天页面
+    router.push(`/chat/${latestChat.id}`);
+  };
 </script>
 <style scoped></style>

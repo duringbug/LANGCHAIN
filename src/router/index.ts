@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import TestView from '@/views/TestView.vue'
 import HomeView from '@/views/HomeView.vue'
 import ChatView from '@/views/ChatView.vue'
 import BeginView from '@/views/BeginView.vue'
@@ -13,9 +12,10 @@ const router = createRouter({
       component: HomeView,
       children: [
         {
-          path: 'chat', // 这个路径会嵌套在 / 路径下，形成 /chat
+          path: 'chat/:id', // 动态路径，传递 chat id
           name: 'chat',
           component: ChatView,
+          props: true, // 将路由参数传递给组件
         },
         {
           path: '',
@@ -24,11 +24,6 @@ const router = createRouter({
         }
       ]
     },
-    {
-      path: '/test',
-      name: 'test',
-      component: TestView,
-    }
   ],
 })
 

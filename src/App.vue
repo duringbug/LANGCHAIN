@@ -27,7 +27,6 @@ import {
             <!-- 导航栏 -->
             <nav class="space-x-6">
                 <RouterLink to="/" class="hover:text-gray-400 transition-colors text-lg">Home</RouterLink>
-                <RouterLink to="/test" class="hover:text-gray-400 transition-colors text-lg">Test</RouterLink>
             </nav>
         </div>
     </header>
